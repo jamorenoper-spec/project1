@@ -6,10 +6,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -20,33 +19,33 @@ import jakarta.validation.constraints.NotBlank;
 // mas restriccion unica sobre idpersona para forzar la relacion 1 a 1).
 @Entity
 @Table(name = "Usuario", schema = "PPOOII", uniqueConstraints = {
-        @UniqueConstraint(name = "UQ_USUARIO_IDPERSONA", columnNames = "IdPersona"),
-        @UniqueConstraint(name = "UQ_USUARIO_APIKEY", columnNames = "ApiKey")
+        @UniqueConstraint(name = "UQ_USUARIO_IDPERSONA", columnNames = "id_persona"),
+        @UniqueConstraint(name = "UQ_USUARIO_APIKEY", columnNames = "api_key")
 })
 @IdClass(UsuarioId.class)
 public class Usuario implements Serializable {
 
     @Id
-    @Column(name = "IdPersona")
+    @Column(name = "id_persona")
     private Long idpersona;
 
     @Id
     @NotBlank(message = "El login es obligatorio")
-    @Column(name = "Login", nullable = false, length = 30)
+    @Column(name = "login", nullable = false, length = 30)
     private String login;
 
-    @MapsId("idpersona")
+    // Solo lectura: la columna id_persona se escribe a traves del atributo idpersona.
     @OneToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "IdPersona", nullable = false, insertable = false, updatable = false,
+    @JoinColumn(name = "id_persona", nullable = false, insertable = false, updatable = false,
             foreignKey = @ForeignKey(name = "FK_USUARIO_PERSONA"))
     private Persona persona;
 
     @NotBlank(message = "El password es obligatorio")
-    @Column(name = "Password", nullable = false, length = 255)
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
     @NotBlank(message = "El apikey es obligatorio")
-    @Column(name = "ApiKey", nullable = false, length = 255, unique = true)
+    @Column(name = "api_key", nullable = false, length = 255)
     private String apikey;
 
     public Usuario() {
