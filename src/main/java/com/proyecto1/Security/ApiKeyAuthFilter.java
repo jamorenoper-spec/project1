@@ -33,8 +33,13 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
         }
         // Excepcion de arranque: crear una persona (y su Usuario, si es ADMINISTRATIVO) no puede
         // requerir un apikey, porque todavia no existe ninguno la primera vez que se usa el sistema.
+        if ("POST".equalsIgnoreCase(request.getMethod())
+                && (request.getContextPath() + "/proyecto1/persona").equals(request.getRequestURI())) {
+            return true;
+        }
+        // El login tampoco puede requerir el apikey: es justamente el medio para obtenerlo.
         return "POST".equalsIgnoreCase(request.getMethod())
-                && (request.getContextPath() + "/proyecto1/persona").equals(request.getRequestURI());
+                && (request.getContextPath() + "/proyecto1/usuario/login").equals(request.getRequestURI());
     }
 
     @Override

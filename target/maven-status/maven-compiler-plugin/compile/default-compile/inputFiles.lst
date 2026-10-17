@@ -2,6 +2,7 @@ C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Conf
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Config\SecurityFilterConfig.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Controller\DocumentoController.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Controller\PersonaController.java
+C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Controller\TrayectoCargueController.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Controller\TrayectoController.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Controller\UsuarioController.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Controller\VehiculoConductorController.java
@@ -9,8 +10,10 @@ C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Cont
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\ApiKeyResponse.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\CambiarEstadoConductorRequest.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\CambiarPasswordRequest.java
+C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\CargueTrayectoResponse.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\DocumentoActualizadoRequest.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\DocumentoAsociadoRequest.java
+C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\LoginRequest.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\ParadaRequest.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\PersonaCreadaResponse.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\PersonaPorTipoResponse.java
@@ -23,6 +26,7 @@ C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\DTO\
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\Documento.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\EstadoConductor.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\EstadoDocumento.java
+C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\EstadoTrayectoTmp.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\Obligatoriedad.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\Persona.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\TipoCombustible.java
@@ -32,6 +36,7 @@ C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Enti
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\TipoVehiculo.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\TipoVehiculoAplica.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\Trayecto.java
+C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\TrayectoTmp.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\Usuario.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\UsuarioId.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Entities\Vehiculo.java
@@ -44,6 +49,7 @@ C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Proy
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Repository\DocumentoRepository.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Repository\PersonaRepository.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Repository\TrayectoRepository.java
+C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Repository\TrayectoTmpRepository.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Repository\UsuarioRepository.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Repository\VehiculoConductorRepository.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Repository\VehiculoDocumentoRepository.java
@@ -55,11 +61,13 @@ C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Secu
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\DocumentoServiceImpl.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\Interfaces\IDocumentoService.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\Interfaces\IPersonaService.java
+C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\Interfaces\ITrayectoCargueService.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\Interfaces\ITrayectoService.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\Interfaces\IUsuarioService.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\Interfaces\IVehiculoConductorService.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\Interfaces\IVehiculoService.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\PersonaServiceImpl.java
+C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\TrayectoCargueServiceImpl.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\TrayectoServiceImpl.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\UsuarioServiceImpl.java
 C:\Users\josue\Downloads\Laboratorio1\Proyecto1\src\main\java\com\proyecto1\Services\VehiculoConductorServiceImpl.java

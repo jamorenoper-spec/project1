@@ -16,10 +16,11 @@ public class SecurityFilterConfig {
     @Qualifier("IUsuarioRepo")
     private UsuarioRepository usuarioRepository;
 
-    // Protege los endpoints administrativos de cada recurso (Fase 1, Fase 2 y las consultas de
-    // Fase 3). Los servicios publicos (bajo "/publico/") quedan exentos via shouldNotFilter.
-    // La creacion de un trayecto (POST /proyecto1/trayecto) y el login/alta de persona no
-    // requieren token, consistente con el resto del flujo de creacion de usuarios.
+    // Protege los endpoints administrativos de cada recurso (Fase 1, Fase 2, la creacion y
+    // consultas de trayecto de Fase 3, y el cargue de Fase 4). Los servicios publicos (bajo
+    // "/publico/") quedan exentos via shouldNotFilter, al igual que el login y el alta de la
+    // primera persona (bootstrap: todavia no existe ningun apikey la primera vez que se usa
+    // el sistema).
     @Bean
     public FilterRegistrationBean<ApiKeyAuthFilter> apiKeyAuthFilter() {
         FilterRegistrationBean<ApiKeyAuthFilter> registration = new FilterRegistrationBean<>();
@@ -30,7 +31,8 @@ public class SecurityFilterConfig {
                 "/proyecto1/persona", "/proyecto1/persona/*",
                 "/proyecto1/usuario", "/proyecto1/usuario/*",
                 "/proyecto1/vehiculo-conductor", "/proyecto1/vehiculo-conductor/*",
-                "/proyecto1/trayecto/consulta", "/proyecto1/trayecto/consulta/*");
+                "/proyecto1/trayecto", "/proyecto1/trayecto/consulta", "/proyecto1/trayecto/consulta/*",
+                "/proyecto1/trayecto/cargue", "/proyecto1/trayecto/cargue/*");
         registration.setOrder(1);
         return registration;
     }

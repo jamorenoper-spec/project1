@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.proyecto1.DTO.ApiKeyResponse;
 import com.proyecto1.Entities.Usuario;
+import com.proyecto1.Exception.BusinessException;
 import com.proyecto1.Exception.ResourceNotFoundException;
 import com.proyecto1.Repository.UsuarioRepository;
 import com.proyecto1.Services.Interfaces.IUsuarioService;
@@ -49,6 +50,19 @@ public class UsuarioServiceImpl implements IUsuarioService {
         usuarioRepository.save(usuario);
         logger.info("APIKEY REGENERADO PARA EL USUARIO {}", login);
         return new ApiKeyResponse(usuario.getLogin(), nuevaApikey);
+    }
+
+    // Login basico: a cambio de login+password devuelve el apikey del usuario, para que el
+    // frontend no tenga que guardar/pegar el apikey a mano. No crea sesion ni token nuevo;
+    // el apikey ya existente sigue siendo el unico mecanismo de autenticacion de la API.
+    @Override
+    public ApiKeyResponse login(String login, String password) {
+        Usuario usuario = usuarioRepository.findByLogin(login).orElse(null);
+        if (usuario == null || !passwordEncoder.matches(password, usuario.getPassword())) {
+            logger.error("ERROR LOGIN: CREDENCIALES INVALIDAS PARA EL LOGIN {}!", login);
+            throw new BusinessException("Login o contraseña incorrectos");
+        }
+        return new ApiKeyResponse(usuario.getLogin(), usuario.getApikey());
     }
 
     private Usuario findByLogin(String login) {

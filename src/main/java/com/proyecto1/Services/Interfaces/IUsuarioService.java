@@ -7,4 +7,6 @@ public interface IUsuarioService {
     void cambiarPassword(String login, String nuevaPassword);
 
     ApiKeyResponse regenerarApikey(String login);
+
+    ApiKeyResponse login(String login, String password);
 }

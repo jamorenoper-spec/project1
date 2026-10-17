@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.proyecto1.DTO.ApiKeyResponse;
 import com.proyecto1.DTO.CambiarPasswordRequest;
+import com.proyecto1.DTO.LoginRequest;
 import com.proyecto1.Services.Interfaces.IUsuarioService;
 
 import jakarta.validation.Valid;
@@ -24,6 +26,12 @@ public class UsuarioController {
     @Autowired
     @Qualifier("UsuarioService")
     private IUsuarioService usuarioService;
+
+    // POST: login basico (login + password) -> devuelve el apikey del usuario. No requiere token.
+    @PostMapping("/login")
+    public ResponseEntity<ApiKeyResponse> login(@RequestBody @Valid LoginRequest request) {
+        return ResponseEntity.ok(usuarioService.login(request.getLogin(), request.getPassword()));
+    }
 
     // PUT: cambia el password de un usuario (login en la URL, password nuevo en el body).
     @PutMapping("/{login}/password")

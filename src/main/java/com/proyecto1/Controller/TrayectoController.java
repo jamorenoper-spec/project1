@@ -42,6 +42,13 @@ public class TrayectoController {
         return ResponseEntity.ok(trayectoService.findByCodigoRuta(codigoRuta));
     }
 
+    // Busqueda de rutas por texto libre en la ubicacion (ej. "Ibagué"), para cuando no se
+    // conoce el codigo de ruta exacto.
+    @GetMapping("/consulta/ubicacion/{texto}")
+    public ResponseEntity<List<Trayecto>> getByUbicacion(@PathVariable("texto") String texto) {
+        return ResponseEntity.ok(trayectoService.findByUbicacion(texto));
+    }
+
     // Codigos de ruta (agrupados) de un conductor, por su número de identificación.
     @GetMapping("/consulta/conductor/{identificacion}")
     public ResponseEntity<List<String>> getCodigosRutaByConductor(
