@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.proyecto1.DTO.ApiKeyResponse;
 import com.proyecto1.Entities.Usuario;
 import com.proyecto1.Exception.BusinessException;
 import com.proyecto1.Exception.ResourceNotFoundException;
@@ -27,38 +28,45 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     // ====================== LOGS ======================
     private static final Logger logger = LogManager.getLogger(UsuarioServiceImpl.class);
-
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    // Cambia el password de un usuario. El nuevo password se guarda cifrado.
+    // Cambia el password de un usuario especifico (login en la URL, password nuevo en el body).
     @Override
     @Transactional
-    public void cambiarPassword(String login, String nuevoPassword) {
-        if (nuevoPassword == null || nuevoPassword.isBlank()) {
-            logger.error("ERROR CAMBIAR_PASSWORD: EL NUEVO PASSWORD ES NULO O VACIO!");
-            throw new BusinessException("El nuevo password es obligatorio");
-        }
-        Usuario usuario = buscarPorLogin(login);
-        usuario.setPassword(passwordEncoder.encode(nuevoPassword));
+    public void cambiarPassword(String login, String nuevaPassword) {
+        Usuario usuario = findByLogin(login);
+        usuario.setPassword(passwordEncoder.encode(nuevaPassword));
         usuarioRepository.save(usuario);
+        logger.info("PASSWORD ACTUALIZADO PARA EL USUARIO {}", login);
     }
 
-    // Genera un nuevo APIKey para el usuario y lo devuelve.
+    // Genera nuevamente el APIKey de un usuario especifico.
     @Override
     @Transactional
-    public String regenerarApikey(String login) {
-        Usuario usuario = buscarPorLogin(login);
+    public ApiKeyResponse regenerarApikey(String login) {
+        Usuario usuario = findByLogin(login);
         String nuevaApikey = UUID.randomUUID().toString();
         usuario.setApikey(nuevaApikey);
         usuarioRepository.save(usuario);
-        return nuevaApikey;
+        logger.info("APIKEY REGENERADO PARA EL USUARIO {}", login);
+        return new ApiKeyResponse(usuario.getLogin(), nuevaApikey);
     }
 
-    private Usuario buscarPorLogin(String login) {
-        if (login == null || login.isBlank()) {
-            throw new BusinessException("El login es obligatorio");
+    // Login basico: a cambio de login+password devuelve el apikey del usuario, para que el
+    // frontend no tenga que guardar/pegar el apikey a mano. No crea sesion ni token nuevo;
+    // el apikey ya existente sigue siendo el unico mecanismo de autenticacion de la API.
+    @Override
+    public ApiKeyResponse login(String login, String password) {
+        Usuario usuario = usuarioRepository.findByLogin(login).orElse(null);
+        if (usuario == null || !passwordEncoder.matches(password, usuario.getPassword())) {
+            logger.error("ERROR LOGIN: CREDENCIALES INVALIDAS PARA EL LOGIN {}!", login);
+            throw new BusinessException("Login o contraseña incorrectos");
         }
-        return usuarioRepository.findByLogin(login.trim().toLowerCase())
+        return new ApiKeyResponse(usuario.getLogin(), usuario.getApikey());
+    }
+
+    private Usuario findByLogin(String login) {
+        return usuarioRepository.findByLogin(login)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe un usuario con login " + login));
     }
 }

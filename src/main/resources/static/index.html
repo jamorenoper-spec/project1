@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Trayectos</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    :root {
+        --bg: #eef1f6;
+        --card: #ffffff;
+        --text: #111827;
+        --text-muted: #6b7280;
+        --border: #e5e7eb;
+        --primary: #4f46e5;
+        --primary-hover: #4338ca;
+        --primary-soft: #eef2ff;
+        --ok: #15803d;
+        --ok-soft: #ecfdf3;
+        --error: #b91c1c;
+        --error-soft: #fef2f2;
+        --radius: 14px;
+        --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: "Inter", "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+    }
+    header {
+        background: linear-gradient(135deg, #4f46e5, #4338ca);
+        color: white;
+        padding: 1.75rem 1.5rem;
+    }
+    .header-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header p { margin: 0.3rem 0 0; font-size: 0.88rem; opacity: 0.85; }
+    .sesion-chip {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 999px;
+        padding: 0.45rem 1rem;
+        font-size: 0.82rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        white-space: nowrap;
+    }
+    .sesion-chip button {
+        background: transparent;
+        border: none;
+        color: white;
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 0.8rem;
+        padding: 0;
+    }
+
+    main {
+        max-width: 1100px;
+        margin: -1.5rem auto 2rem;
+        padding: 0 1.25rem;
+    }
+
+    .card {
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        border: 1px solid var(--border);
+    }
+    .card h2 {
+        margin: 0 0 1rem;
+        font-size: 1.05rem;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .card h2 .icono { font-size: 1.1rem; }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        align-items: start;
+    }
+    @media (max-width: 820px) {
+        .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .campos { display: flex; gap: 0.85rem; flex-wrap: wrap; align-items: flex-end; }
+    .campo { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 150px; }
+    label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
+    input[type="text"], input[type="password"] {
+        padding: 0.6rem 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background: #fafafa;
+        transition: border-color 0.15s, background 0.15s;
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: white;
+    }
+    input[type="file"] { padding: 0.4rem 0; border: none; font-size: 0.85rem; }
+
+    button {
+        padding: 0.6rem 1.25rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+        white-space: nowrap;
+    }
+    button:hover { background: var(--primary-hover); }
+    button:disabled { background: #c7c9d9; cursor: not-allowed; }
+
+    #mensaje, #mensajeCargue, #mensajeLogin {
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        padding: 0.1rem 0;
+    }
+    .error { color: var(--error); }
+    .info { color: var(--text-muted); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border); }
+    th { background: #f9fafb; color: var(--text-muted); font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+
+    #mapa { height: 380px; border-radius: 10px; margin-top: 0.75rem; }
+    .oculto { display: none !important; }
+
+    #resumenCargue {
+        font-weight: 600;
+        margin: 0 0 0.25rem;
+        padding: 0.6rem 0.9rem;
+        background: var(--primary-soft);
+        border-radius: 8px;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .estado-procesado { color: var(--ok); font-weight: 600; }
+    .estado-error { color: var(--error); font-weight: 600; }
+    .estado-validado { color: var(--primary); font-weight: 600; }
+    .estado-cargado { color: var(--text-muted); font-weight: 600; }
+
+    .login-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        background: var(--ok-soft);
+        border: 1px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 0.9rem 1.1rem;
+        font-size: 0.88rem;
+        flex-wrap: wrap;
+    }
+    .login-banner strong { color: var(--ok); }
+    .link-btn {
+        background: transparent;
+        color: var(--primary);
+        border: none;
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0;
+    }
+    .separador {
+        margin: 1rem 0 0.6rem;
+        padding-top: 0.85rem;
+        border-top: 1px dashed var(--border);
+        font-size: 0.78rem;
+        color: var(--text-muted);
+    }
+    .lista-resultados {
+        list-style: none;
+        margin: 0.6rem 0 0;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .lista-resultados li {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.15s;
+    }
+    .lista-resultados li:last-child { border-bottom: none; }
+    .lista-resultados li:hover { background: var(--primary-soft); }
+    .lista-resultados li .codigo { font-weight: 600; color: var(--primary); }
+    .lista-resultados li .ubicacion { color: var(--text-muted); display: block; font-size: 0.8rem; }
+
+    .aviso-sesion {
+        background: var(--error-soft);
+        color: var(--error);
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.82rem;
+        margin-top: 0.75rem;
+    }
+</style>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <div>
+            <h1>Gestión de Trayectos</h1>
+            <p>Consulta rutas y carga trayectos masivamente desde Excel</p>
+        </div>
+        <div class="sesion-chip" id="sesionChip">
+            <span id="sesionTexto">No has iniciado sesión</span>
+        </div>
+    </div>
+</header>
+<main>
+    <section class="card" id="panelLogin">
+        <h2><span class="icono">🔐</span> Iniciar sesión</h2>
+
+        <div id="loginFormulario">
+            <div class="campos">
+                <div class="campo">
+                    <label for="loginUsuario">Login</label>
+                    <input id="loginUsuario" type="text" placeholder="Ej. ap123456" />
+                </div>
+                <div class="campo">
+                    <label for="loginPassword">Password</label>
+                    <input id="loginPassword" type="password" placeholder="Contraseña" />
+                </div>
+                <button id="entrar">Entrar</button>
+            </div>
+            <div id="mensajeLogin"></div>
+        </div>
+
+        <div id="loginActivo" class="login-banner oculto">
+            <span>Sesión activa como <strong id="loginActivoNombre"></strong></span>
+            <button class="link-btn" id="cerrarSesion">Cerrar sesión</button>
+        </div>
+    </section>
+
+    <div class="grid-2 oculto" id="accionesPanel">
+        <section class="card">
+            <h2><span class="icono">🔎</span> Consultar ruta</h2>
+            <div class="campos">
+                <div class="campo">
+                    <label for="codigoRuta">Código de ruta</label>
+                    <input id="codigoRuta" type="text" placeholder="Ej. RUTA-001" />
+                </div>
+                <button id="buscar">Buscar</button>
+            </div>
+            <div id="mensaje"></div>
+
+            <div class="separador">o si no conoces el código, busca por ubicación</div>
+            <div class="campos">
+                <div class="campo">
+                    <label for="textoUbicacion">Ubicación</label>
+                    <input id="textoUbicacion" type="text" placeholder="Ej. Ibagué" />
+                </div>
+                <button id="buscarUbicacion">Buscar</button>
+            </div>
+            <div id="mensajeUbicacion"></div>
+            <ul id="listaUbicacion" class="lista-resultados oculto"></ul>
+        </section>
+
+        <section class="card">
+            <h2><span class="icono">📥</span> Cargue masivo (Excel)</h2>
+            <div class="campos">
+                <div class="campo">
+                    <label for="archivoExcel">Plantilla Excel (.xlsx)</label>
+                    <input id="archivoExcel" type="file" accept=".xlsx" />
+                </div>
+                <button id="cargar">Cargar</button>
+            </div>
+            <div id="mensajeCargue"></div>
+        </section>
+    </div>
+
+    <section class="card oculto" id="resultado">
+        <h2><span class="icono">🗺️</span> Paradas de la ruta</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Orden</th>
+                    <th>Ubicación</th>
+                    <th>Latitud</th>
+                    <th>Longitud</th>
+                    <th>Conductor</th>
+                    <th>Vehículo</th>
+                </tr>
+            </thead>
+            <tbody id="tablaParadas"></tbody>
+        </table>
+        <div id="mapa"></div>
+    </section>
+
+    <section class="card oculto" id="resultadoCargue">
+        <h2><span class="icono">📋</span> Resultado del cargue</h2>
+        <p id="resumenCargue"></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Conductor</th>
+                    <th>Placa</th>
+                    <th>Código ruta</th>
+                    <th>Orden</th>
+                    <th>Estado</th>
+                    <th>Observación</th>
+                </tr>
+            </thead>
+            <tbody id="tablaCargue"></tbody>
+        </table>
+    </section>
+</main>
+
+<script>
+    // ================= SESION (login basico: login+password -> apikey) =================
+    const CLAVE_STORAGE = 'proyecto1_apiKey';
+    const CLAVE_STORAGE_LOGIN = 'proyecto1_login';
+    let apiKeyActual = null;
+
+    const sesionTexto = document.getElementById('sesionTexto');
+    const loginFormulario = document.getElementById('loginFormulario');
+    const loginActivo = document.getElementById('loginActivo');
+    const loginActivoNombre = document.getElementById('loginActivoNombre');
+    const mensajeLogin = document.getElementById('mensajeLogin');
+
+    function mostrarMensajeEn(elemento, texto, tipo) {
+        elemento.textContent = texto;
+        elemento.className = tipo || '';
+    }
+
+    function guardarSesion(login, apikey) {
+        apiKeyActual = apikey;
+        try {
+            localStorage.setItem(CLAVE_STORAGE, apikey);
+            localStorage.setItem(CLAVE_STORAGE_LOGIN, login);
+        } catch (error) {
+            // Sin localStorage (modo privado, etc.): la sesion solo dura mientras la pestaña siga abierta.
+        }
+        actualizarVistaSesion(login);
+    }
+
+    function cerrarSesion() {
+        apiKeyActual = null;
+        try {
+            localStorage.removeItem(CLAVE_STORAGE);
+            localStorage.removeItem(CLAVE_STORAGE_LOGIN);
+        } catch (error) {
+            // no-op
+        }
+        actualizarVistaSesion(null);
+    }
+
+    function actualizarVistaSesion(login) {
+        const accionesPanel = document.getElementById('accionesPanel');
+        if (login) {
+            sesionTexto.textContent = 'Conectado: ' + login;
+            loginFormulario.classList.add('oculto');
+            loginActivo.classList.remove('oculto');
+            loginActivoNombre.textContent = login;
+            accionesPanel.classList.remove('oculto');
+        } else {
+            sesionTexto.textContent = 'No has iniciado sesión';
+            loginFormulario.classList.remove('oculto');
+            loginActivo.classList.add('oculto');
+            accionesPanel.classList.add('oculto');
+            document.getElementById('resultado').classList.add('oculto');
+            document.getElementById('resultadoCargue').classList.add('oculto');
+        }
+    }
+
+    function restaurarSesionGuardada() {
+        try {
+            const apikey = localStorage.getItem(CLAVE_STORAGE);
+            const login = localStorage.getItem(CLAVE_STORAGE_LOGIN);
+            if (apikey && login) {
+                apiKeyActual = apikey;
+                actualizarVistaSesion(login);
+            }
+        } catch (error) {
+            // no-op
+        }
+    }
+
+    async function iniciarSesion() {
+        const login = document.getElementById('loginUsuario').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        if (!login || !password) {
+            mostrarMensajeEn(mensajeLogin, 'Ingrese login y password.', 'error');
+            return;
+        }
+
+        mostrarMensajeEn(mensajeLogin, 'Ingresando...', 'info');
+
+        try {
+            const respuesta = await fetch('/proyecto1/usuario/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password })
+            });
+
+            const cuerpo = await respuesta.json().catch(() => ({}));
+
+            if (!respuesta.ok) {
+                mostrarMensajeEn(mensajeLogin, cuerpo.error || ('Error ' + respuesta.status + ' al iniciar sesión.'), 'error');
+                return;
+            }
+
+            document.getElementById('loginPassword').value = '';
+            mostrarMensajeEn(mensajeLogin, '', '');
+            guardarSesion(cuerpo.login, cuerpo.apikey);
+        } catch (error) {
+            mostrarMensajeEn(mensajeLogin, 'No fue posible conectar con el servidor.', 'error');
+        }
+    }
+
+    document.getElementById('entrar').addEventListener('click', iniciarSesion);
+    document.getElementById('cerrarSesion').addEventListener('click', cerrarSesion);
+    restaurarSesionGuardada();
+
+    // ================= CONSULTA DE RUTA =================
+    const btnBuscar = document.getElementById('buscar');
+    const mensaje = document.getElementById('mensaje');
+    const resultado = document.getElementById('resultado');
+    const tablaParadas = document.getElementById('tablaParadas');
+    let mapa = null;
+    let capaRuta = null;
+
+    function inicializarMapa() {
+        if (mapa) return;
+        mapa = L.map('mapa').setView([4.6, -74.1], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(mapa);
+    }
+
+    // Calcula el trazado real por calles entre las paradas (OSRM, servicio publico y gratuito,
+    // sin necesitar API key). Si no responde, se traza una linea recta punteada como respaldo.
+    async function obtenerRutaPorCalles(puntos) {
+        try {
+            const coords = puntos.map(([lat, lon]) => `${lon},${lat}`).join(';');
+            const respuesta = await fetch(
+                `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`
+            );
+            if (!respuesta.ok) throw new Error('OSRM no disponible');
+
+            const datos = await respuesta.json();
+            if (datos.code !== 'Ok' || !datos.routes || !datos.routes.length) throw new Error('Sin ruta');
+
+            const trazado = datos.routes[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+            return L.polyline(trazado, { color: '#4f46e5', weight: 4 });
+        } catch (error) {
+            return L.polyline(puntos, { color: '#4f46e5', weight: 3, dashArray: '6 8' });
+        }
+    }
+
+    async function dibujarRuta(paradas) {
+        inicializarMapa();
+        if (capaRuta) {
+            mapa.removeLayer(capaRuta);
+        }
+        const puntos = paradas
+            .filter(p => p.latitud != null && p.longitud != null)
+            .map(p => [p.latitud, p.longitud]);
+
+        const marcadores = puntos.map((punto, i) => L.marker(punto).bindPopup('Parada ' + i));
+        const capas = [L.layerGroup(marcadores)];
+
+        let linea = null;
+        if (puntos.length > 1) {
+            linea = await obtenerRutaPorCalles(puntos);
+            capas.push(linea);
+        }
+
+        capaRuta = L.layerGroup(capas).addTo(mapa);
+
+        if (linea) {
+            mapa.fitBounds(linea.getBounds());
+        } else if (puntos.length > 0) {
+            mapa.fitBounds(L.latLngBounds(puntos, puntos));
+        }
+    }
+
+    async function buscarRuta(codigoRutaForzado) {
+        const codigoRuta = codigoRutaForzado || document.getElementById('codigoRuta').value.trim();
+        if (codigoRutaForzado) {
+            document.getElementById('codigoRuta').value = codigoRutaForzado;
+        }
+
+        if (!apiKeyActual) {
+            mostrarMensajeEn(mensaje, 'Inicia sesión primero para consultar rutas.', 'error');
+            return;
+        }
+        if (!codigoRuta) {
+            mostrarMensajeEn(mensaje, 'Ingrese un código de ruta.', 'error');
+            return;
+        }
+
+        mostrarMensajeEn(mensaje, 'Buscando...', 'info');
+        resultado.classList.add('oculto');
+
+        try {
+            const respuesta = await fetch('/proyecto1/trayecto/consulta/ruta/' + encodeURIComponent(codigoRuta), {
+                headers: { 'X-API-KEY': apiKeyActual }
+            });
+
+            if (!respuesta.ok) {
+                const cuerpo = await respuesta.json().catch(() => ({}));
+                mostrarMensajeEn(mensaje, cuerpo.error || ('Error ' + respuesta.status + ' al consultar la ruta.'), 'error');
+                return;
+            }
+
+            const paradas = await respuesta.json();
+            mostrarMensajeEn(mensaje, 'Ruta "' + codigoRuta + '": ' + paradas.length + ' parada(s).', 'info');
+
+            tablaParadas.innerHTML = paradas.map(p => `
+                <tr>
+                    <td>${p.ordenParada}</td>
+                    <td>${p.ubicacion}</td>
+                    <td>${p.latitud ?? '-'}</td>
+                    <td>${p.longitud ?? '-'}</td>
+                    <td>${p.persona ? (p.persona.nombres + ' ' + p.persona.apellidos) : '-'}</td>
+                    <td>${p.vehiculo ? p.vehiculo.placa : '-'}</td>
+                </tr>
+            `).join('');
+
+            resultado.classList.remove('oculto');
+            await dibujarRuta(paradas);
+        } catch (error) {
+            mostrarMensajeEn(mensaje, 'No fue posible conectar con el servidor.', 'error');
+        }
+    }
+
+    btnBuscar.addEventListener('click', () => buscarRuta());
+
+    // ================= BUSQUEDA POR UBICACION =================
+    const mensajeUbicacion = document.getElementById('mensajeUbicacion');
+    const listaUbicacion = document.getElementById('listaUbicacion');
+
+    async function buscarPorUbicacion() {
+        const texto = document.getElementById('textoUbicacion').value.trim();
+
+        if (!apiKeyActual) {
+            mostrarMensajeEn(mensajeUbicacion, 'Inicia sesión primero para buscar.', 'error');
+            return;
+        }
+        if (!texto) {
+            mostrarMensajeEn(mensajeUbicacion, 'Escriba parte de una ubicación (ej. Ibagué).', 'error');
+            return;
+        }
+
+        mostrarMensajeEn(mensajeUbicacion, 'Buscando...', 'info');
+        listaUbicacion.classList.add('oculto');
+
+        try {
+            const respuesta = await fetch('/proyecto1/trayecto/consulta/ubicacion/' + encodeURIComponent(texto), {
+                headers: { 'X-API-KEY': apiKeyActual }
+            });
+
+            if (!respuesta.ok) {
+                const cuerpo = await respuesta.json().catch(() => ({}));
+                mostrarMensajeEn(mensajeUbicacion, cuerpo.error || ('Error ' + respuesta.status + ' al buscar.'), 'error');
+                return;
+            }
+
+            const paradas = await respuesta.json();
+
+            // Varias paradas pueden pertenecer a la misma ruta: se muestra una sola vez por codigoRuta.
+            const rutasUnicas = new Map();
+            paradas.forEach(p => {
+                if (!rutasUnicas.has(p.codigoRuta)) {
+                    rutasUnicas.set(p.codigoRuta, p.ubicacion);
+                }
+            });
+
+            if (rutasUnicas.size === 0) {
+                mostrarMensajeEn(mensajeUbicacion, 'No se encontraron rutas con esa ubicación.', 'info');
+                return;
+            }
+
+            mostrarMensajeEn(mensajeUbicacion, rutasUnicas.size + ' ruta(s) encontrada(s). Haz clic para verla:', 'info');
+
+            listaUbicacion.innerHTML = Array.from(rutasUnicas.entries()).map(([codigo, ubicacion]) => `
+                <li data-codigo="${codigo}">
+                    <span class="codigo">${codigo}</span>
+                    <span class="ubicacion">${ubicacion}</span>
+                </li>
+            `).join('');
+            listaUbicacion.classList.remove('oculto');
+
+            listaUbicacion.querySelectorAll('li').forEach(li => {
+                li.addEventListener('click', () => buscarRuta(li.dataset.codigo));
+            });
+        } catch (error) {
+            mostrarMensajeEn(mensajeUbicacion, 'No fue posible conectar con el servidor.', 'error');
+        }
+    }
+
+    document.getElementById('buscarUbicacion').addEventListener('click', buscarPorUbicacion);
+
+    // ================= CARGUE MASIVO =================
+    const btnCargar = document.getElementById('cargar');
+    const mensajeCargue = document.getElementById('mensajeCargue');
+    const resultadoCargue = document.getElementById('resultadoCargue');
+    const resumenCargue = document.getElementById('resumenCargue');
+    const tablaCargue = document.getElementById('tablaCargue');
+
+    async function cargarExcel() {
+        const archivoInput = document.getElementById('archivoExcel');
+
+        if (!apiKeyActual) {
+            mostrarMensajeEn(mensajeCargue, 'Inicia sesión primero para cargar trayectos.', 'error');
+            return;
+        }
+        if (!archivoInput.files.length) {
+            mostrarMensajeEn(mensajeCargue, 'Seleccione un archivo Excel (.xlsx).', 'error');
+            return;
+        }
+
+        mostrarMensajeEn(mensajeCargue, 'Cargando...', 'info');
+        resultadoCargue.classList.add('oculto');
+
+        const formData = new FormData();
+        formData.append('archivo', archivoInput.files[0]);
+
+        try {
+            const respuesta = await fetch('/proyecto1/trayecto/cargue', {
+                method: 'POST',
+                headers: { 'X-API-KEY': apiKeyActual },
+                body: formData
+            });
+
+            const cuerpo = await respuesta.json().catch(() => ({}));
+
+            if (!respuesta.ok) {
+                mostrarMensajeEn(mensajeCargue, cuerpo.error || ('Error ' + respuesta.status + ' al cargar el archivo.'), 'error');
+                return;
+            }
+
+            mostrarMensajeEn(mensajeCargue, 'Cargue completado.', 'info');
+            resumenCargue.textContent = `IdCargue: ${cuerpo.idCargue} · Total: ${cuerpo.totalRegistros} · Procesados: ${cuerpo.procesados} · Con error: ${cuerpo.conError}`;
+
+            tablaCargue.innerHTML = cuerpo.detalle.map((fila, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${fila.personaIdentificacion ?? '-'}</td>
+                    <td>${fila.vehiculoPlaca ?? '-'}</td>
+                    <td>${fila.codigoRuta ?? '-'}</td>
+                    <td>${fila.ordenParada ?? '-'}</td>
+                    <td class="estado-${fila.estado.toLowerCase()}">${fila.estado}</td>
+                    <td>${fila.observacion || '-'}</td>
+                </tr>
+            `).join('');
+
+            resultadoCargue.classList.remove('oculto');
+        } catch (error) {
+            mostrarMensajeEn(mensajeCargue, 'No fue posible conectar con el servidor.', 'error');
+        }
+    }
+
+    btnCargar.addEventListener('click', cargarExcel);
+</script>
+</body>
+</html>

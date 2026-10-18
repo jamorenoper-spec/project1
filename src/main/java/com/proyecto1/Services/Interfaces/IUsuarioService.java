@@ -1,8 +1,12 @@
 package com.proyecto1.Services.Interfaces;
 
+import com.proyecto1.DTO.ApiKeyResponse;
+
 public interface IUsuarioService {
 
-    void cambiarPassword(String login, String nuevoPassword);
+    void cambiarPassword(String login, String nuevaPassword);
 
-    String regenerarApikey(String login);
+    ApiKeyResponse regenerarApikey(String login);
+
+    ApiKeyResponse login(String login, String password);
 }
